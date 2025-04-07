@@ -56,18 +56,25 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # The upload URL is provided by the create-release step
+          # Strip the templated part from the upload URL.
           upload_url="${{ steps.create_release.outputs.upload_url }}"
-          # Loop over any generated zip or tar.gz files and upload them one-by-one.
+          upload_url="${upload_url%\{*}"
+
+          # Loop over generated archives
           for asset in *.tar.gz *.zip; do
             if [ -f "$asset" ]; then
               echo "Uploading $asset"
-              mime_type=$(file --mime-type -b "$asset")
-              curl -s \
-                -X POST \
+              if [[ "$asset" == *.zip ]]; then
+                content_type="application/zip"
+              else
+                content_type="application/gzip"
+              fi
+              # URL‑encode the asset name (ensure python3 is available on the runner)
+              encoded_name=$(python3 -c "import urllib.parse; print(urllib.parse.quote('''$asset'''))")
+              curl --fail -X POST \
                 -H "Authorization: token $GITHUB_TOKEN" \
-                -H "Content-Type: $mime_type" \
+                -H "Content-Type: ${content_type}" \
                 --data-binary @"$asset" \
-                "${upload_url}?name=$(basename "$asset")"
+                "${upload_url}?name=${encoded_name}"
             fi
           done
