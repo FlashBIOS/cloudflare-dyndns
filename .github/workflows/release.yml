@@ -1,5 +1,8 @@
 name: Create Release on Master Push
 
+permissions:
+  contents: write
+
 on:
   push:
     branches: [ master ]
