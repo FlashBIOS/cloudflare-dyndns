@@ -19,6 +19,17 @@ jobs:
         with:
           go-version: '1.24'
 
+      - name: Cache Go Modules
+        uses: actions/cache@v3
+        with:
+          # Caching both module downloads and build cache
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
       - name: Build Release Artifacts
         run: make release
 
