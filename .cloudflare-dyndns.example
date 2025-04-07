@@ -1,0 +1,7 @@
+[main]
+home_gateway = ""
+
+[cloudflare]
+api_token = ""
+zone_id = ""
+update_records = ["", ""]
