@@ -10,7 +10,6 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -23,6 +22,24 @@ jobs:
       - name: Build Release Artifacts
         run: make release
 
+      - name: Archive Binaries per OS/Arch
+        env:
+          # Set the name of the binary as built by your Makefile.
+          BINARY_NAME: cloudflare-dyndns
+        run: |
+          # Loop over each OS and architecture directory under bin/
+          for os in $(ls bin); do
+            for arch in $(ls bin/$os); do
+              if [ "$os" = "windows" ]; then
+                echo "Archiving for $os $arch as zip"
+                zip -j "${os}-${arch}.zip" "bin/$os/$arch/$BINARY_NAME"
+              else
+                echo "Archiving for $os $arch as tar.gz"
+                tar -C "bin/$os/$arch" -czvf "${os}-${arch}.tar.gz" "$BINARY_NAME"
+              fi
+            done
+          done
+
       - name: Create GitHub Release
         id: create_release
         uses: actions/create-release@v1
@@ -34,3 +51,23 @@ jobs:
           body: "Automated release generated on push to master."
           draft: false
           prerelease: false
+
+      - name: Upload Release Assets
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # The upload URL is provided by the create-release step
+          upload_url="${{ steps.create_release.outputs.upload_url }}"
+          # Loop over any generated zip or tar.gz files and upload them one-by-one.
+          for asset in *.tar.gz *.zip; do
+            if [ -f "$asset" ]; then
+              echo "Uploading $asset"
+              mime_type=$(file --mime-type -b "$asset")
+              curl -s \
+                -X POST \
+                -H "Authorization: token $GITHUB_TOKEN" \
+                -H "Content-Type: $mime_type" \
+                --data-binary @"$asset" \
+                "${upload_url}?name=$(basename "$asset")"
+            fi
+          done
