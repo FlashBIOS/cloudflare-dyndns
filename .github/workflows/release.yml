@@ -24,10 +24,8 @@ jobs:
 
       - name: Archive Binaries per OS/Arch
         env:
-          # Set the name of the binary as built by your Makefile.
           BINARY_NAME: cloudflare-dyndns
         run: |
-          # Loop over each OS and architecture directory under bin/
           for os in $(ls bin); do
             for arch in $(ls bin/$os); do
               if [ "$os" = "windows" ]; then
@@ -40,6 +38,36 @@ jobs:
             done
           done
 
+      # This step uses GitHub Script to query for the PRs associated with the head commit.
+      - name: Get PR Messages
+        id: pr_messages
+        uses: actions/github-script@v6
+        with:
+          script: |
+            // Get the head commit SHA from the push payload.
+            const commitSha = context.payload.head_commit.id;
+            // Query the API for pull requests associated with that commit.
+            const { data: pulls } = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: commitSha,
+              mediaType: {
+                previews: ['groot']  // Enable the preview needed for this endpoint.
+              }
+            });
+
+            let prNotes = '';
+            if (pulls.length > 0) {
+              prNotes = pulls.map(pr => {
+                return `PR #${pr.number}: ${pr.title}\n${pr.body || ""}`;
+              }).join("\n\n---\n\n");
+            } else {
+              prNotes = "No associated PRs found.";
+            }
+            core.info("Found PR messages:\n" + prNotes);
+            return prNotes;
+          result-encoding: string
+
       - name: Create GitHub Release
         id: create_release
         uses: actions/create-release@v1
@@ -48,7 +76,11 @@ jobs:
         with:
           tag_name: "v${{ github.run_number }}"
           release_name: "Release ${{ github.run_number }}"
-          body: "Automated release generated on push to master."
+          body: |
+            Automated release generated on push to master.
+
+            PR Messages:
+            ${{ steps.pr_messages.outputs.result }}
           draft: false
           prerelease: false
 
@@ -60,7 +92,7 @@ jobs:
           upload_url="${{ steps.create_release.outputs.upload_url }}"
           upload_url="${upload_url%\{*}"
 
-          # Loop over generated archives
+          # Loop over generated archives.
           for asset in *.tar.gz *.zip; do
             if [ -f "$asset" ]; then
               echo "Uploading $asset"
@@ -69,7 +101,7 @@ jobs:
               else
                 content_type="application/gzip"
               fi
-              # URL‑encode the asset name (ensure python3 is available on the runner)
+              # URL‑encode the asset name.
               encoded_name=$(python3 -c "import urllib.parse; print(urllib.parse.quote('''$asset'''))")
               curl --fail -X POST \
                 -H "Authorization: token $GITHUB_TOKEN" \
