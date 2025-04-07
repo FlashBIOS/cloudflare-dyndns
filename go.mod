@@ -9,7 +9,7 @@ require (
 	github.com/jpillora/backoff v1.0.0
 	github.com/rs/zerolog v1.33.0
 	github.com/spf13/cobra v1.9.1
-	github.com/spf13/viper v1.20.0
+	github.com/spf13/viper v1.20.1
 )
 
 require (
