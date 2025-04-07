@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"cloudflare-dyndns/config"
-	"cloudflare-dyndns/helpers"
 	"fmt"
 	"github.com/TwiN/go-color"
 	"github.com/rs/zerolog"
@@ -57,7 +56,7 @@ func initConfig() {
 	} else {
 		// Find home directory.
 		home, err := os.UserHomeDir()
-		helpers.FatalError(err)
+		FatalError(err)
 
 		// Candidate paths in the specified order.
 		candidatePaths := []string{
@@ -81,6 +80,7 @@ func initConfig() {
 
 		viper.SetConfigFile(foundConfigPath)
 		viper.SetConfigType("toml")
+		configFile = foundConfigPath
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
@@ -97,7 +97,7 @@ func initConfig() {
 
 	// Set the configuration defaults.
 	viper.SetDefault("main.user_agent", "cloudflare-dyndns/1.0.0")
-	viper.SetDefault("main.log_file_path", "./")
+	viper.SetDefault("main.log_file_path", "")
 	viper.SetDefault("main.home_gateway", "")
 	viper.SetDefault("cloudflare.api_token", "")
 	viper.SetDefault("cloudflare.base_url", "https://api.cloudflare.com/client/v4")
@@ -126,7 +126,7 @@ func initConfig() {
 
 	// Set up the logger.
 	if cfg.LogFilePath != "" {
-		logFilePath := filepath.Join(cfg.LogFilePath, "cloudflare-dyndns.log")
+		logFilePath := cfg.LogFilePath
 		logFile, err := os.OpenFile(logFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 		if err != nil {
 			msg := color.With(color.Red, fmt.Sprintf("Error opening log file: %v\n", err))
@@ -148,6 +148,6 @@ func initConfig() {
 			//FormatErrFieldValue: func(i interface{}) string {
 			//	return color.With(color.Green, i.(string))
 			//},
-		}).With().Timestamp().Logger()
+		}).With().Timestamp().Str("configFile", configFile).Logger()
 	}
 }

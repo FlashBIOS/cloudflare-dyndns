@@ -34,7 +34,7 @@ jobs:
             ${{ runner.os }}-go-
 
       - name: Build Release Artifacts
-        run: make release
+        run: make release-all
 
       - name: Archive Binaries per OS/Arch
         env:

@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"cloudflare-dyndns/cloudflare"
-	"cloudflare-dyndns/helpers"
 	"cloudflare-dyndns/ipify"
 	"fmt"
 	"github.com/TwiN/go-color"
@@ -23,7 +22,7 @@ var updateCmd = &cobra.Command{
 		// Get the gateway information, if configured.
 		if homeGateway := cfg.HomeGateway; len(homeGateway) > 0 {
 			cg, err := gateway.DiscoverGateway()
-			helpers.FatalError(err)
+			FatalError(err)
 			currentGateway := cg.String()
 
 			if homeGateway != currentGateway {
@@ -119,8 +118,6 @@ var updateCmd = &cobra.Command{
 			message := fmt.Sprintf("Could not find DNS record with name \"%s\".", strings.Join(names, "\", \""))
 			logger.Warn().Msg(message)
 			fmt.Println(message)
-			//log.Printf("WARNING: Could not find DNS record with name \"%s\".", strings.Join(names, "\", \""))
-			//_, _ = fmt.Printf("Could not find DNS record with name \"%s\".\n", strings.Join(names, "\", \""))
 		}
 	},
 }
