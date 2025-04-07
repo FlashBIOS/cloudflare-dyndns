@@ -14,6 +14,20 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
+      - name: Generate release tag
+        id: generate_release_tag
+        uses: amitsingh-007/next-release-tag@v4.1.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          tag_prefix: 'v'
+          tag_template: 'yyyy.mm.dd.i'
+
+      - name: Generate changelog
+        uses: Bullrich/generate-release-changelog@master
+        id: generate_changelog
+        env:
+          REPO: ${{ github.repository }}
+
       - name: Set Up Go
         uses: actions/setup-go@v4
         with:
@@ -53,48 +67,16 @@ jobs:
             done
           done
 
-      # This step uses GitHub Script to query for the PRs associated with the head commit.
-      - name: Get PR Messages
-        id: pr_messages
-        uses: actions/github-script@v6
-        with:
-          script: |
-            // Get the head commit SHA and message from the push payload.
-            const commitSha = context.payload.head_commit.id;
-            const commitMessage = context.payload.head_commit.message;
-
-            // Query the API for pull requests associated with that commit.
-            const { data: pulls } = await github.rest.repos.listPullRequestsAssociatedWithCommit({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              commit_sha: commitSha,
-              mediaType: {
-                previews: ['groot']  // Required for this endpoint.
-              }
-            });
-
-            let prNotes = '';
-            if (pulls.length > 0) {
-              prNotes = pulls.map(pr => {
-                return `PR #${pr.number}: ${pr.title}\n${pr.body || ""}`;
-              }).join("\n\n---\n\n");
-            } else {
-              prNotes = `${commitMessage}`;
-            }
-            core.info("Final release notes:\n" + prNotes);
-            return prNotes;
-          result-encoding: string
-
       - name: Create GitHub Release
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: "v${{ github.run_number }}"
-          release_name: "Release ${{ github.run_number }}"
+          tag_name: ${{ steps.generate_release_tag.outputs.next_release_tag }}
+          release_name: ${{ steps.generate_release_tag.outputs.next_release_tag }}
           body: |
-            ${{ steps.pr_messages.outputs.result }}
+            ${{ steps.generate_changelog.outputs.changelog }}
           draft: false
           prerelease: false
 
