@@ -1,7 +1,61 @@
+#############################################
+# [main] Configuration
+#############################################
+# home_gateway:
+#   - Use this setting to update the IP address only when using a specific gateway.
+#   - Useful for devices that frequently switch networks or connect via VPN.
+#   - If left empty, updates will happen from any gateway.
+# home_gateway = ""
+#
+# log_file_path:
+#   - Specify the directory where your log file will be created.
+#   - Ensure the directory exists and has the proper permissions.
+#   - If left empty, no log file will be created.
+# log_file_path = "/var/log/cloudflare-dyndns.log"
+#
+# user_agent:
+#   - The User-Agent header used when making API requests.
+#   - The default value is typically sufficient.
+# user_agent = "cloudflare-dyndns/1.0.0"
+#############################################
 [main]
 home_gateway = ""
+#log_file_path = "/var/log/cloudflare-dyndns.log"   # Example for Unix-based systems
+#log_file_path = "C:\\ProgramData\\cloudflare-dyndns\\cloudflare-dyndns.log"   # Example for Windows systems
 
+
+#############################################
+# [cloudflare] Configuration
+#############################################
+# api_token:
+#   - Your Cloudflare API token for authenticating with the Cloudflare API.
+# api_token = ""
+#
+# zone_id:
+#   - The DNS zone identifier for the domain you wish to update.
+# zone_id = ""
+#
+# update_records:
+#   - A list of one or more hostnames within this DNS zone to be updated.
+#   - The hostnames should be specified as a quoted, comma-separated list.
+# update_records = ["www", "mail", "etc"]
+#
+# base_url:
+#   - The base URL for Cloudflare's API. Generally, the default should be used.
+# base_url = "https://api.cloudflare.com/client/v4"
+#############################################
 [cloudflare]
 api_token = ""
 zone_id = ""
 update_records = ["", ""]
+
+
+#############################################
+# [ipify] Configuration
+#############################################
+# url:
+#   - The URL used to retrieve your public IP address.
+#   - Typically, the default value is used unless directed otherwise.
+# url = "https://api64.ipify.org"
+#############################################
+[ipify]
