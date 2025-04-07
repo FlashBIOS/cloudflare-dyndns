@@ -7,7 +7,7 @@ require (
 	github.com/apex/log v1.9.0
 	github.com/jackpal/gateway v1.0.16
 	github.com/jpillora/backoff v1.0.0
-	github.com/rs/zerolog v1.33.0
+	github.com/rs/zerolog v1.34.0
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/viper v1.20.0
 )
