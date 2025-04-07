@@ -76,6 +76,7 @@ jobs:
           tag_name: ${{ steps.generate_release_tag.outputs.next_release_tag }}
           release_name: ${{ steps.generate_release_tag.outputs.next_release_tag }}
           body: |
+            ## What's Changed
             ${{ steps.generate_changelog.outputs.changelog }}
           draft: false
           prerelease: false
