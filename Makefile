@@ -29,8 +29,12 @@ release: tidy verify test clean
 	@for os in $(TARGETS); do \
 		for arch in $(ARCH); do \
 			echo "Building for $$os $$arch..."; \
-			mkdir -p $(BUILD_DIR)/$$os; \
-			GOOS=$$os GOARCH=$$arch $(GOBUILD) -trimpath -ldflags="-s -w" -o $(BUILD_DIR)/$$os/$$arch/$(BINARY_NAME) .; \
+			mkdir -p $(BUILD_DIR)/$$os/$$arch; \
+			ext=""; \
+			if [ "$$os" = "windows" ]; then \
+				ext=".exe"; \
+			fi; \
+			GOOS=$$os GOARCH=$$arch $(GOBUILD) -trimpath -ldflags="-s -w" -o $(BUILD_DIR)/$$os/$$arch/$(BINARY_NAME)$$ext .; \
 		done; \
 	done
 
