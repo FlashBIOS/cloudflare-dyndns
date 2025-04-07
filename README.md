@@ -118,6 +118,14 @@ Contributions are welcome! Please open an issue or submit a pull request with
 details about your proposed changes. Be sure to follow Go best practices and
 include tests for any new functionality.
 
+The `master` branch contains stable, released code.  
+If you'd like to contribute, please base your changes off the `development` branch.
+
+```bash
+git checkout development
+git checkout -b feature/your-branch-name
+```
+
 ## License
 
 This project is licensed under a permissive license. See the [LICENSE](LICENSE)
