@@ -24,7 +24,7 @@ ARCH ?= amd64 arm64
 all: build
 
 # Release compiles an optimized version of the binary.
-release: tidy verify test clean
+release: vet verify test clean
 	@echo "Building binaries for: $(TARGETS)"
 	@for os in $(TARGETS); do \
 		for arch in $(ARCH); do \
@@ -60,7 +60,7 @@ fmt:
 	$(GOFMT) ./...
 
 # Vet reports any suspicious constructs in the code.
-vet:
+vet: tidy
 	@echo "Linting with vet..."
 	$(GOVET) ./...
 
