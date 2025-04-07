@@ -64,7 +64,7 @@ jobs:
                 return `PR #${pr.number}: ${pr.title}\n${pr.body || ""}`;
               }).join("\n\n---\n\n");
             } else {
-              prNotes = `No associated PRs found.\n\nCommit Message:\n${commitMessage}`;
+              prNotes = `${commitMessage}`;
             }
             core.info("Final release notes:\n" + prNotes);
             return prNotes;
