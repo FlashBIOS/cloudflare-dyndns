@@ -41,7 +41,8 @@ jobs:
             for arch in $(ls bin/$os); do
               if [ "$os" = "windows" ]; then
                 echo "Archiving for $os $arch as zip"
-                zip -j "${os}-${arch}.zip" "bin/$os/$arch/$BINARY_NAME"
+                # Append .exe for windows
+                zip -j "${os}-${arch}.zip" "bin/$os/$arch/${BINARY_NAME}.exe"
               else
                 echo "Archiving for $os $arch as tar.gz"
                 tar -C "bin/$os/$arch" -czvf "${os}-${arch}.tar.gz" "$BINARY_NAME"
