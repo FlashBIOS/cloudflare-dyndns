@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"cloudflare-dyndns/helpers"
 	"cloudflare-dyndns/ipify"
 	"fmt"
 	"github.com/spf13/cobra"
@@ -13,7 +12,7 @@ var ipCmd = &cobra.Command{
 	Short: "Print your public IP address.",
 	Run: func(cmd *cobra.Command, args []string) {
 		ip, err := ipify.New(&cfg).GetPublicIP()
-		helpers.FatalError(err)
+		FatalError(err)
 
 		fmt.Printf("%s\n", ip)
 	},
