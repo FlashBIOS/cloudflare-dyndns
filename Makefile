@@ -19,9 +19,13 @@ TARGETS ?= darwin linux windows
 # Set the build architecture.
 ARCH ?= amd64 arm64
 
-.PHONY: all release build test run fmt vet clean tidy verify install release-all
+.PHONY: all release build test run fmt vet clean tidy verify install release-all checkout-master
 
-install:
+checkout-master:
+	@echo "Checking out the master branch"
+	git checkout master
+
+install: checkout-master
 	@echo "Installing $(BINARY_NAME) for your system"
 	GOOS=$(shell go env GOOS) GOARCH=$(shell go env GOARCH) $(GOINSTALL) -trimpath -ldflags="-s -w" .
 	@echo "Done! Don't forget to create your configuration file (see README.md) before running."
@@ -31,7 +35,7 @@ uninstall:
 	@echo "Done! Don't forget to delete any configuration file you created."
 
 # Release compiles an optimized version of the binary.
-release-all: vet verify test clean
+release-all: checkout-master vet verify test clean
 	@echo "Building binaries for: $(TARGETS)"
 	@for os in $(TARGETS); do \
 		for arch in $(ARCH); do \
@@ -45,7 +49,7 @@ release-all: vet verify test clean
 		done; \
 	done
 
-release: vet verify test clean
+release: checkout-master vet verify test clean
 	@os="$(shell go env GOOS)"
 	@arch="$(shell go env GOARCH)"
 	@ext="";
