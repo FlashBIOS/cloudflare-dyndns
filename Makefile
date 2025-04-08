@@ -27,20 +27,21 @@ checkout-master:
 
 install: checkout-master
 	@echo "Installing $(BINARY_NAME) for your system"
-	GOOS=$(shell go env GOOS) GOARCH=$(shell go env GOARCH) $(GOINSTALL) -trimpath -ldflags="-s -w" .
+	GOOS=$(GOOS) GOARCH=$(GOARCH) $(GOINSTALL) -trimpath -ldflags="-s -w" .
 	@echo "Done! Don't forget to create your configuration file (see README.md) before running."
 
 uninstall:
-	rm "$(shell go env GOPATH)/bin/$(BINARY_NAME)"
+	rm "$(GOPATH)/bin/$(BINARY_NAME)"
 	@echo "Done! Don't forget to delete any configuration file you created."
 
-# Release compiles an optimized version of the binary.
-release-all: checkout-master vet verify test clean
+create-build-dir:
+	@mkdir -p $(BUILD_DIR)
+
+release-all: checkout-master vet verify test clean create-build-dir
 	@echo "Building binaries for: $(TARGETS)"
 	@for os in $(TARGETS); do \
 		for arch in $(ARCH); do \
 			echo "Building for $$os $$arch..."; \
-			mkdir -p $(BUILD_DIR)/$$os/$$arch; \
 			ext=""; \
 			if [ "$$os" = "windows" ]; then \
 				ext=".exe"; \
@@ -49,9 +50,9 @@ release-all: checkout-master vet verify test clean
 		done; \
 	done
 
-release: checkout-master vet verify test clean
-	@os="$(shell go env GOOS)"
-	@arch="$(shell go env GOARCH)"
+release: checkout-master vet verify test clean create-build-dir
+	@os="$(GOOS)"
+	@arch="$(GOARCH)"
 	@ext="";
 	@if [ "$$os" = "windows" ]; then \
 		ext=".exe"; \
@@ -59,9 +60,8 @@ release: checkout-master vet verify test clean
 	GOOS=$$os GOARCH=$$arch $(GOBUILD) -trimpath -ldflags="-s -w" -o $(BUILD_DIR)/$$os/$$arch/$(BINARY_NAME)$$ext .;
 
 # Build compiles the Go code and outputs the binary into the build directory.
-build:
+build: create-build-dir
 	@echo "Building binary..."
-	@mkdir -p $(BUILD_DIR)
 	$(GOBUILD) -o $(BUILD_DIR)/$(BINARY_NAME)
 
 # Test runs all tests.
