@@ -14,8 +14,6 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4.2.2
-        with:
-          ref: master
 
       - name: Generate Changelog with Release Drafter
         uses: release-drafter/release-drafter@v6.1.0
