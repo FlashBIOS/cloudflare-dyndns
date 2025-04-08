@@ -21,7 +21,7 @@ jobs:
         run: go mod tidy
 
       - name: Cache Go Modules
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           # Caching both module downloads and build cache
           path: |
