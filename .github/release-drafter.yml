@@ -5,15 +5,18 @@ categories:
   - title: "🚀 Features"
     labels:
       - "feature"
-  - title: "🐛 Fixes"
+  - title: "🪲 Fixes"
     labels:
       - "bug"
-  - title: "🧰 Maintenance"
+  - title: "🛠️ Maintenance"
     labels:
-      - "chore"
+      - "maintenance"
   - title: "📦 Dependency Updates"
     labels:
       - "dependencies"
+  - title: "📖 Documentation Updates"
+    labels:
+      - "documentation"
 
 change-template: "- $TITLE (#$NUMBER) by @$AUTHOR"
 
