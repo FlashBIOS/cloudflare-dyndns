@@ -14,11 +14,8 @@ BINARY_NAME = cloudflare-dyndns
 BUILD_DIR = bin
 RELEASE_DIR = $(BUILD_DIR)/release
 
-# Set default target OS's if none are specified.
-TARGETS ?= darwin linux windows
-
-# Set the build architecture.
-ARCH ?= amd64 arm64
+# List of GOOS/GOARCH combos (dash-separated)
+GO_TARGETS := linux-amd64 linux-arm64 darwin-amd64 darwin-arm64 windows-amd64 windows-arm64
 
 # Set the version information.
 VERSION = $(shell git tag --sort=-v:refname | grep -E "^v[0-9]+\.[0-9]+\.[0-9]+$$" | head -n 1)
@@ -39,20 +36,17 @@ uninstall:
 	rm "$(GOPATH)/bin/$(BINARY_NAME)"
 	@echo "Done! Don't forget to delete any configuration file you created."
 
-release-all: checkout-master vet verify test clean
-	@echo "Building binaries for: $(TARGETS)"
-	@for os in $(TARGETS); do \
-		for arch in $(ARCH); do \
-			echo "Building for $$os $$arch..."; \
-			ext=""; \
-			if [ "$$os" = "windows" ]; then \
-				ext=".exe"; \
-			fi; \
-			GOOS=$$os GOARCH=$$arch $(GOBUILD) -trimpath -ldflags="-s -w -X $(MODULE)/cmd.Version=$(VERSION)" -o $(RELEASE_DIR)/$$os/$$arch/$(BINARY_NAME)$$ext . & \
-		done; \
-	done; \
-	wait
-	@echo "Done!"
+release-all: checkout-master vet verify test clean $(addprefix release-,$(GO_TARGETS))
+	echo "Done!"
+
+release-%:
+	@GOOS=$(word 1,$(subst -, ,$*)) && \
+	GOARCH=$(word 2,$(subst -, ,$*)) && \
+	OUTDIR=bin/release/$$GOOS/$$GOARCH && \
+	echo "Building $$GOOS/$$GOARCH..." && \
+	mkdir -p $$OUTDIR && \
+	CGO_ENABLED=0 GOOS=$$GOOS GOARCH=$$GOARCH \
+	go build -ldflags "-s -w -X main.version=$(RELEASE_VERSION)" -o $$OUTDIR/cloudflare-dyndns
 
 # Define target-specific variables for 'release'
 release: os := $(shell go env GOOS)
