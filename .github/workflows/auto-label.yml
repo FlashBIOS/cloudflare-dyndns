@@ -1,9 +1,10 @@
-name: Auto Label Based on Branch Name
+name: Apply and Require a Label
 
 permissions:
   contents: write
   issues: write
   pull-requests: write
+  actions: read
 
 on:
   pull_request:
@@ -13,7 +14,11 @@ jobs:
   auto-label:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/github-script@v7
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up GitHub Script
+        uses: actions/github-script@v7
         with:
           script: |
             const branch = context.payload.pull_request.head.ref;
@@ -38,7 +43,11 @@ jobs:
             } else {
               console.log(`Label "${label}" not found in repo; skipping.`);
             }
-      - uses: mheap/github-action-required-labels@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+
+      - name: Required Labels - Minimum
+        uses: mheap/github-action-required-labels@v5
         with:
           mode: minimum
           count: 1
@@ -49,9 +58,15 @@ jobs:
             enhancement
             documentation
           add_comment: true
-      - uses: mheap/github-action-required-labels@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+
+      - name: Required Labels - Exactly
+        uses: mheap/github-action-required-labels@v5
         with:
           mode: exactly
           count: 0
           labels: "do not merge"
           add_comment: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
