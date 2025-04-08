@@ -15,6 +15,13 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
+      - name: Checkout master branch
+        run: git checkout master
+
+      - name: Clean up existing files
+        run: |
+          rm -rf ../../../go/pkg/mod/*
+
       - name: Generate Changelog with Release Drafter
         uses: release-drafter/release-drafter@v5
         id: generate_changelog
