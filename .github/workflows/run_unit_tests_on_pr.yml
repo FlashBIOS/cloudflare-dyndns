@@ -17,9 +17,6 @@ jobs:
         with:
           go-version: '1.24'
 
-      - name: Run go mod tidy
-        run: go mod tidy
-
       - name: Cache Go Modules
         uses: actions/cache@v4
         with:
@@ -30,6 +27,9 @@ jobs:
           key: v1-${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}-${{ github.run_id }}
           restore-keys: |
             v1-${{ runner.os }}-go-
+
+      - name: Run go mod tidy
+        run: go mod tidy
 
       - name: Run Unit Tests
         run: go test -v ./...
