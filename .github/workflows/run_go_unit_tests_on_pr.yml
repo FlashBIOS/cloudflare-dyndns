@@ -1,8 +1,10 @@
-name: Run Unit Tests on PR
+name: Run Go Unit Tests on PR
 
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+    paths:
+      - '**/*.go'
 
 jobs:
   test:
