@@ -27,20 +27,21 @@ checkout-master:
 
 install: checkout-master
 	@echo "Installing $(BINARY_NAME) for your system"
-	GOOS=$(shell go env GOOS) GOARCH=$(shell go env GOARCH) $(GOINSTALL) -trimpath -ldflags="-s -w" .
+	GOOS=$(GOOS) GOARCH=$(GOARCH) $(GOINSTALL) -trimpath -ldflags="-s -w" .
 	@echo "Done! Don't forget to create your configuration file (see README.md) before running."
 
 uninstall:
-	rm "$(shell go env GOPATH)/bin/$(BINARY_NAME)"
+	rm "$(GOPATH)/bin/$(BINARY_NAME)"
 	@echo "Done! Don't forget to delete any configuration file you created."
 
-# Release compiles an optimized version of the binary.
-release-all: checkout-master vet verify test clean
+create-build-dir:
+	@mkdir -p $(BUILD_DIR)
+
+release-all: checkout-master vet verify test clean create-build-dir
 	@echo "Building binaries for: $(TARGETS)"
 	@for os in $(TARGETS); do \
 		for arch in $(ARCH); do \
 			echo "Building for $$os $$arch..."; \
-			mkdir -p $(BUILD_DIR)/$$os/$$arch; \
 			ext=""; \
 			if [ "$$os" = "windows" ]; then \
 				ext=".exe"; \
@@ -49,52 +50,43 @@ release-all: checkout-master vet verify test clean
 		done; \
 	done
 
-release: checkout-master vet verify test clean
-	@os="$(shell go env GOOS)"
-	@arch="$(shell go env GOARCH)"
+release: checkout-master vet verify test clean create-build-dir
+	@os="$(GOOS)"
+	@arch="$(GOARCH)"
 	@ext="";
 	@if [ "$$os" = "windows" ]; then \
 		ext=".exe"; \
 	fi;
 	GOOS=$$os GOARCH=$$arch $(GOBUILD) -trimpath -ldflags="-s -w" -o $(BUILD_DIR)/$$os/$$arch/$(BINARY_NAME)$$ext .;
 
-# Build compiles the Go code and outputs the binary into the build directory.
-build:
+build: create-build-dir
 	@echo "Building binary..."
-	@mkdir -p $(BUILD_DIR)
 	$(GOBUILD) -o $(BUILD_DIR)/$(BINARY_NAME)
 
-# Test runs all tests.
 test:
 	@echo "Running tests..."
 	$(GOTEST) -v ./...
 
-# Run builds and runs the binary.
 run: build
 	@echo "Running binary..."
 	./$(BUILD_DIR)/$(BINARY_NAME)
 
-# Fmt formats the Go code.
 fmt:
 	@echo "Formatting code..."
 	$(GOFMT) ./...
 
-# Vet reports any suspicious constructs in the code.
 vet: tidy
 	@echo "Linting with vet..."
 	$(GOVET) ./...
 
-# Clean removes build artifacts.
 clean:
 	@echo "Cleaning build artifacts..."
 	@rm -rf $(BUILD_DIR)
 
-# Tidy cleans up the mod file.
 tidy:
 	@echo "Tidying up the go.mod file..."
 	$(GOMOD) tidy
 
-# Verify all the module dependencies
 verify:
 	@echo "Verifying the module dependencies..."
 	$(GOMOD) verify
