@@ -59,6 +59,7 @@ release: checkout-master vet verify test clean create-build-dir
 	fi;
 	GOOS=$$os GOARCH=$$arch $(GOBUILD) -trimpath -ldflags="-s -w" -o $(BUILD_DIR)/$$os/$$arch/$(BINARY_NAME)$$ext .;
 
+# Build compiles the Go code and outputs the binary into the build directory.
 build: create-build-dir
 	@echo "Building binary..."
 	$(GOBUILD) -o $(BUILD_DIR)/$(BINARY_NAME)
