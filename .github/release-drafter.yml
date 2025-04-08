@@ -14,6 +14,9 @@ categories:
   - title: "📦 Dependency Updates"
     labels:
       - "dependencies"
+  - title: "📖 Documentation Updates"
+    labels:
+      - "documentation"
 
 change-template: "- $TITLE (#$NUMBER) by @$AUTHOR"
 
