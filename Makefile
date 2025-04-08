@@ -20,6 +20,7 @@ GO_TARGETS := linux-amd64 linux-arm64 darwin-amd64 darwin-arm64 windows-amd64 wi
 # Set the version information.
 VERSION = $(shell git tag --sort=-v:refname | grep -E "^v[0-9]+\.[0-9]+\.[0-9]+$$" | head -n 1)
 MODULE = $(shell head -1 go.mod | awk '/^module/ {print $$2; exit}')
+RELEASE_VERSION = $(MODULE)/cmd.Version=$(VERSION)
 
 .PHONY: all release build test run fmt vet clean tidy verify install release-all checkout-master uninstall check fmt-check
 
@@ -36,18 +37,23 @@ uninstall:
 	rm "$(GOPATH)/bin/$(BINARY_NAME)"
 	@echo "Done! Don't forget to delete any configuration file you created."
 
-release-all: checkout-master vet verify test clean $(addprefix release-,$(GO_TARGETS))
-	echo "Done!"
-
 # Allows for parallel builds with `make -j`
+release-all:
+	$(MAKE) checkout-master
+	$(MAKE) clean
+	$(MAKE) vet verify test
+	$(MAKE) $(addprefix release-,$(GO_TARGETS))
+	@echo "Done building all executables for release!"
+
 release-%:
 	@GOOS=$(word 1,$(subst -, ,$*)) && \
 	GOARCH=$(word 2,$(subst -, ,$*)) && \
 	OUTDIR=bin/release/$$GOOS/$$GOARCH && \
-	echo "Building $$GOOS/$$GOARCH..." && \
+	if [ "$$GOOS" = "windows" ]; then EXT=".exe"; else EXT=""; fi && \
+	echo "Building $$OUTDIR/$(BINARY_NAME)$$EXT..." && \
 	mkdir -p $$OUTDIR && \
 	CGO_ENABLED=0 GOOS=$$GOOS GOARCH=$$GOARCH \
-	go build -ldflags "-s -w -X main.version=$(RELEASE_VERSION)" -o $$OUTDIR/cloudflare-dyndns
+	go build -ldflags "-s -w -X $(RELEASE_VERSION)" -o $$OUTDIR/$(BINARY_NAME)$$EXT;
 
 # Define target-specific variables for 'release'
 release: os := $(shell go env GOOS)
@@ -56,7 +62,7 @@ release: ext := $(if $(filter windows,$(os)),.exe,)
 
 release: checkout-master vet verify test clean
 	@echo "Building binary for: $(os) $(arch)..."
-	GOOS=$(os) GOARCH=$(arch) $(GOBUILD) -trimpath -ldflags="-s -w -X $(MODULE)/cmd.Version=$(VERSION)" -o $(RELEASE_DIR)/$(os)/$(arch)/$(BINARY_NAME)$(ext) .
+	GOOS=$(os) GOARCH=$(arch) $(GOBUILD) -trimpath -ldflags="-s -w -X $(RELEASE_VERSION)" -o $(RELEASE_DIR)/$(os)/$(arch)/$(BINARY_NAME)$(ext) .
 	@echo "Done!"
 
 # Build compiles the Go code and outputs the binary into the build directory.
