@@ -12,6 +12,7 @@ BINARY_NAME = cloudflare-dyndns
 
 # The directory where the binary will be placed.
 BUILD_DIR = bin
+RELEASE_DIR = $(BUILD_DIR)/release
 
 # Set default target OS's if none are specified.
 TARGETS ?= darwin linux windows
@@ -19,7 +20,11 @@ TARGETS ?= darwin linux windows
 # Set the build architecture.
 ARCH ?= amd64 arm64
 
-.PHONY: all release build test run fmt vet clean tidy verify install release-all checkout-master
+# Set the version information.
+VERSION = $(shell git tag --sort=-v:refname | grep -E "^v[0-9]+\.[0-9]+\.[0-9]+$$" | head -n 1)
+MODULE = $(shell head -1 go.mod | awk '/^module/ {print $$2; exit}')
+
+.PHONY: all release build test run fmt vet clean tidy verify install release-all checkout-master uninstall check fmt-check
 
 checkout-master:
 	@echo "Checking out the master branch"
@@ -27,17 +32,14 @@ checkout-master:
 
 install: checkout-master
 	@echo "Installing $(BINARY_NAME) for your system"
-	GOOS=$(GOOS) GOARCH=$(GOARCH) $(GOINSTALL) -trimpath -ldflags="-s -w" .
+	$(GOINSTALL) -trimpath -ldflags="-s -w -X cmd.Version=$(VERSION)" .
 	@echo "Done! Don't forget to create your configuration file (see README.md) before running."
 
 uninstall:
 	rm "$(GOPATH)/bin/$(BINARY_NAME)"
 	@echo "Done! Don't forget to delete any configuration file you created."
 
-create-build-dir:
-	@mkdir -p $(BUILD_DIR)
-
-release-all: checkout-master vet verify test clean create-build-dir
+release-all: checkout-master vet verify test clean
 	@echo "Building binaries for: $(TARGETS)"
 	@for os in $(TARGETS); do \
 		for arch in $(ARCH); do \
@@ -46,21 +48,24 @@ release-all: checkout-master vet verify test clean create-build-dir
 			if [ "$$os" = "windows" ]; then \
 				ext=".exe"; \
 			fi; \
-			GOOS=$$os GOARCH=$$arch $(GOBUILD) -trimpath -ldflags="-s -w" -o $(BUILD_DIR)/$$os/$$arch/$(BINARY_NAME)$$ext .; \
+			GOOS=$$os GOARCH=$$arch $(GOBUILD) -trimpath -ldflags="-s -w -X $(MODULE)/cmd.Version=$(VERSION)" -o $(RELEASE_DIR)/$$os/$$arch/$(BINARY_NAME)$$ext . & \
 		done; \
-	done
+	done; \
+	wait
+	@echo "Done!"
 
-release: checkout-master vet verify test clean create-build-dir
-	@os="$(GOOS)"
-	@arch="$(GOARCH)"
-	@ext="";
-	@if [ "$$os" = "windows" ]; then \
-		ext=".exe"; \
-	fi;
-	GOOS=$$os GOARCH=$$arch $(GOBUILD) -trimpath -ldflags="-s -w" -o $(BUILD_DIR)/$$os/$$arch/$(BINARY_NAME)$$ext .;
+# Define target-specific variables for 'release'
+release: os := $(shell go env GOOS)
+release: arch := $(shell go env GOARCH)
+release: ext := $(if $(filter windows,$(os)),.exe,)
+
+release: checkout-master vet verify test clean
+	@echo "Building binary for: $(os) $(arch)..."
+	GOOS=$(os) GOARCH=$(arch) $(GOBUILD) -trimpath -ldflags="-s -w -X $(MODULE)/cmd.Version=$(VERSION)" -o $(RELEASE_DIR)/$(os)/$(arch)/$(BINARY_NAME)$(ext) .
+	@echo "Done!"
 
 # Build compiles the Go code and outputs the binary into the build directory.
-build: create-build-dir
+build:
 	@echo "Building binary..."
 	$(GOBUILD) -o $(BUILD_DIR)/$(BINARY_NAME)
 
@@ -94,7 +99,16 @@ tidy:
 	@echo "Tidying up the go.mod file..."
 	$(GOMOD) tidy
 
-# Verify all the module dependencies
+# Verify all the module dependencies.
 verify:
 	@echo "Verifying the module dependencies..."
 	$(GOMOD) verify
+
+# Perform a sanity check.
+check: fmt-check test vet verify build
+	@echo "Check complete!"
+
+# Format the Go code or produces an error.
+fmt-check:
+	@echo "Checking code formatting..."
+	$(GOFMT) ./... | tee /dev/stderr | (! read)

@@ -16,6 +16,7 @@ import (
 var cfg config.Config
 var configFile string
 var logger zerolog.Logger
+var Version = "0.0.0-dev"
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -29,7 +30,12 @@ Examples:
   cloudflare-dyns update --name my-record --ip 1.2.3.4`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
+	Run: func(cmd *cobra.Command, args []string) {
+		err := cmd.Help()
+		if err != nil {
+			return
+		}
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -44,7 +50,21 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
+	// Set the version field for automatic version handling.
+	rootCmd.Version = Version
+	rootCmd.SetVersionTemplate("cloudflare-dyndns version {{.Version}}\n")
+
 	rootCmd.PersistentFlags().StringVar(&configFile, "config", "", "config file (default searches for ./.cloudflare-dyndns, ~/.cloudflare-dyndns, or ~/.config/cloudflare-dyndns/.cloudflare-dyndns)")
+
+	// Create a dedicated "version" subcommand if desired.
+	versionCmd := &cobra.Command{
+		Use:   "version",
+		Short: "Print version information and exit",
+		Run: func(cmd *cobra.Command, args []string) {
+			fmt.Printf("cloudflare-dyndns version %s\n", Version)
+		},
+	}
+	rootCmd.AddCommand(versionCmd)
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -87,8 +107,14 @@ func initConfig() {
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		msg := color.With(color.Gray, fmt.Sprintf("Using config file: %s\n", viper.ConfigFileUsed()))
-		fmt.Printf("%s", msg)
+		// Check if "version" or "--version" was passed.
+		if len(os.Args) > 1 {
+			arg := strings.ToLower(os.Args[1])
+			if !strings.Contains(arg, "version") {
+				msg := color.With(color.Gray, fmt.Sprintf("Using config file: %s\n", viper.ConfigFileUsed()))
+				fmt.Printf("%s", msg)
+			}
+		}
 	} else {
 		msg := color.With(color.Red, fmt.Sprintf("ERROR: Config file cannot be loaded: %v\n", err))
 		fmt.Printf("%s", msg)
