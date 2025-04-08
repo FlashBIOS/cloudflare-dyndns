@@ -46,10 +46,10 @@ jobs:
               if [ "$os" = "windows" ]; then
                 echo "Archiving for $os $arch as zip"
                 # Append .exe for windows
-                zip -j "${os}-${arch}.zip" "bin/$os/$arch/${BINARY_NAME}.exe"
+                zip -j "${os}-${arch}.zip" "bin/release/$os/$arch/${BINARY_NAME}.exe"
               else
                 echo "Archiving for $os $arch as tar.gz"
-                tar -C "bin/$os/$arch" -czvf "${os}-${arch}.tar.gz" "$BINARY_NAME"
+                tar -C "bin/release/$os/$arch" -czvf "${os}-${arch}.tar.gz" "$BINARY_NAME"
               fi
             done
           done
