@@ -17,17 +17,6 @@ jobs:
         with:
           ref: master
 
-      - name: Debug Branch Info
-        run: |
-          git branch -a
-          git status
-          ls -la
-        shell: bash
-
-      - name: Clean up existing files
-        run: |
-          rm -rf ../../../go/pkg/mod/*
-
       - name: Generate Changelog with Release Drafter
         uses: release-drafter/release-drafter@v5
         id: generate_changelog
@@ -50,7 +39,7 @@ jobs:
           path: |
             ~/.cache/go-build
             ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}-v1
           restore-keys: |
             ${{ runner.os }}-go-
 
