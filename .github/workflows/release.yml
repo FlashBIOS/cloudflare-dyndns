@@ -18,7 +18,7 @@ jobs:
           ref: master
 
       - name: Generate Changelog with Release Drafter
-        uses: release-drafter/release-drafter@v5
+        uses: release-drafter/release-drafter@v6.1.0
         id: generate_changelog
         with:
           config-name: release-drafter.yml
@@ -66,6 +66,9 @@ jobs:
             ${{ steps.generate_changelog.outputs.body }}
           draft: false
           prerelease: false
+
+      - name: Install GitHub CLI (just in case)
+        run: sudo apt-get update && sudo apt-get install gh -y
 
       - name: Upload Release Assets
         env:
