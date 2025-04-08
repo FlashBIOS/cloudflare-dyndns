@@ -1,5 +1,29 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
+
+# Ensure we're on master branch.
+current_branch=$(git symbolic-ref --short HEAD)
+if [ "$current_branch" != "master" ]; then
+  echo "Error: You must be on the master branch. You are currently on '$current_branch'." >&2
+  exit 1
+fi
+
+# Check for uncommitted changes.
+if ! git diff-index --quiet HEAD --; then
+  echo "Error: There are uncommitted changes. Please commit or stash them before proceeding." >&2
+  exit 1
+fi
+
+# Fetch the latest changes from the remote.
+git fetch
+
+# Check if the local master branch is up to date.
+LOCAL=$(git rev-parse master)
+REMOTE=$(git rev-parse origin/master)
+if [ "$LOCAL" != "$REMOTE" ]; then
+  echo "Error: The local master branch is not up to date with origin/master." >&2
+  exit 1
+fi
 
 # Fetch all tags and find the latest semver tag
 latest_tag=$(git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1)
