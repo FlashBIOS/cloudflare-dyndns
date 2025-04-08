@@ -1,0 +1,15 @@
+name: Require PR Label
+
+on:
+  pull_request:
+    types: [opened, edited, labeled, unlabeled, synchronize]
+
+jobs:
+  check-label:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: pullreminders/label-checker@v1
+        with:
+          required-labels: "maintenance, bug, feature, dependencies, documentation"
+          enable-pr-label-check: true
