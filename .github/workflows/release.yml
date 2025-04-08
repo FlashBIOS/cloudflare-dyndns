@@ -68,4 +68,6 @@ jobs:
           prerelease: false
 
       - name: Upload Release Assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release upload "${{ github.ref_name }}" *.tar.gz *.zip
