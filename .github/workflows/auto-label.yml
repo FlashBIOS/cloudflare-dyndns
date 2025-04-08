@@ -1,8 +1,9 @@
 name: Auto Label Based on Branch Name
 
 permissions:
+  contents: read
   issues: write
-  pull-requests: read
+  pull-requests: write  # Changed from read to write
 
 on:
   pull_request:

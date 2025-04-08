@@ -1,7 +1,9 @@
-name: Pull Request Labels
+name: Require Pull Request Label
+
 on:
   pull_request:
     types: [opened, edited, labeled, unlabeled, synchronize]
+
 jobs:
   label:
     runs-on: ubuntu-latest
