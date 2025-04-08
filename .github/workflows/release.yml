@@ -18,7 +18,7 @@ jobs:
           ref: master
 
       - name: Generate Changelog with Release Drafter
-        uses: release-drafter/release-drafter@v5
+        uses: release-drafter/release-drafter@v6.1.0
         id: generate_changelog
         with:
           config-name: release-drafter.yml
@@ -67,5 +67,10 @@ jobs:
           draft: false
           prerelease: false
 
+      - name: Install GitHub CLI (just in case)
+        run: sudo apt-get update && sudo apt-get install gh -y
+
       - name: Upload Release Assets
         run: gh release upload "${{ github.ref_name }}" *.tar.gz *.zip
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
