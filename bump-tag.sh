@@ -1,5 +1,7 @@
 #!/bin/bash
-set -euo pipefail
+set -o errexit
+set -o nounset
+set -o pipefail
 
 # Fetch all tags and find the latest semver tag
 latest_tag=$(git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1)
@@ -18,9 +20,8 @@ patch=${parts[2]}
 
 # Ask which part to bump
 printf "What do you want to bump?\n"
-select bump in "patch (${major}.${minor}.$((patch+1)))" \
-                "minor (${major}.$((minor+1)).0)" \
-                "major ($((major+1)).0.0)" "abort"; do
+options=("patch (${major}.${minor}.$((patch+1)))" "minor (${major}.$((minor+1)).0)" "major ($((major+1)).0.0)" "abort")
+select bump in "${options[@]}"; do
   case $REPLY in
     1) next_tag="v${major}.${minor}.$((patch+1))"; break ;;
     2) next_tag="v${major}.$((minor+1)).0"; break ;;
