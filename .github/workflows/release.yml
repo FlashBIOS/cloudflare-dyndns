@@ -34,9 +34,8 @@ jobs:
         run: rm -rf ~/go/pkg/mod
 
       - name: Show hashFiles key
-        run: echo "Cache key: $CACHE_KEY"
-        env:
-          CACHE_KEY: v1-${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}-${{ github.run_id }}
+        run: |
+          echo "Cache key: v1-${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}-${{ github.run_id }}"
 
       - name: Cache Go Modules
         uses: actions/cache@v4
