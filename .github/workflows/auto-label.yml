@@ -38,3 +38,20 @@ jobs:
             } else {
               console.log(`Label "${label}" not found in repo; skipping.`);
             }
+      - uses: mheap/github-action-required-labels@v5
+        with:
+          mode: minimum
+          count: 1
+          labels: |
+            maintenance
+            bug
+            feature
+            enhancement
+            documentation
+          add_comment: true
+      - uses: mheap/github-action-required-labels@v5
+        with:
+          mode: exactly
+          count: 0
+          labels: "do not merge"
+          add_comment: true
