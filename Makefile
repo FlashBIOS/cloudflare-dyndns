@@ -39,6 +39,7 @@ uninstall:
 release-all: checkout-master vet verify test clean $(addprefix release-,$(GO_TARGETS))
 	echo "Done!"
 
+# Allows for parallel builds with `make -j`
 release-%:
 	@GOOS=$(word 1,$(subst -, ,$*)) && \
 	GOARCH=$(word 2,$(subst -, ,$*)) && \
