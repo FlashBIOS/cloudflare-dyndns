@@ -39,9 +39,9 @@ jobs:
           path: |
             ~/.cache/go-build
             ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}-v1
+          key: v1-${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
-            ${{ runner.os }}-go-
+            v1-${{ runner.os }}-go-
 
       - name: Build Release Artifacts
         run: make release-all
