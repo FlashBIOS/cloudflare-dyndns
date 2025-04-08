@@ -63,30 +63,37 @@ build: create-build-dir
 	@echo "Building binary..."
 	$(GOBUILD) -o $(BUILD_DIR)/$(BINARY_NAME)
 
+# Test runs all tests.
 test:
 	@echo "Running tests..."
 	$(GOTEST) -v ./...
 
+# Run builds and runs the binary.
 run: build
 	@echo "Running binary..."
 	./$(BUILD_DIR)/$(BINARY_NAME)
 
+# Fmt formats the Go code.
 fmt:
 	@echo "Formatting code..."
 	$(GOFMT) ./...
 
+# Vet reports any suspicious constructs in the code.
 vet: tidy
 	@echo "Linting with vet..."
 	$(GOVET) ./...
 
+# Clean removes build artifacts.
 clean:
 	@echo "Cleaning build artifacts..."
 	@rm -rf $(BUILD_DIR)
 
+# Tidy cleans up the mod file.
 tidy:
 	@echo "Tidying up the go.mod file..."
 	$(GOMOD) tidy
 
+# Verify all the module dependencies
 verify:
 	@echo "Verifying the module dependencies..."
 	$(GOMOD) verify
