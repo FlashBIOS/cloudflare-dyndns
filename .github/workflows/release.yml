@@ -41,8 +41,8 @@ jobs:
         env:
           BINARY_NAME: cloudflare-dyndns
         run: |
-          for os in $(ls bin); do
-            for arch in $(ls bin/$os); do
+          for os in $(ls bin/release); do
+            for arch in $(ls bin/release/$os); do
               if [ "$os" = "windows" ]; then
                 echo "Archiving for $os $arch as zip"
                 # Append .exe for windows
