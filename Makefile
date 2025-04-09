@@ -22,13 +22,9 @@ VERSION = $(shell git tag --sort=-v:refname | grep -E "^v[0-9]+\.[0-9]+\.[0-9]+$
 MODULE = $(shell head -1 go.mod | awk '/^module/ {print $$2; exit}')
 RELEASE_VERSION = $(MODULE)/cmd.Version=$(VERSION)
 
-.PHONY: all release build test run fmt vet clean tidy verify install release-all checkout-master uninstall check fmt-check
+.PHONY: all release build test run fmt vet clean tidy verify install release-all uninstall check fmt-check
 
-checkout-master:
-	@echo "Checking out the master branch"
-	git checkout master
-
-install: checkout-master
+install:
 	@echo "Installing $(BINARY_NAME) for your system"
 	$(GOINSTALL) -trimpath -ldflags="-s -w -X cmd.Version=$(VERSION)" .
 	@echo "Done! Don't forget to create your configuration file (see README.md) before running."
@@ -39,7 +35,6 @@ uninstall:
 
 # Allows for parallel builds with `make -j`
 release-all:
-	$(MAKE) checkout-master
 	$(MAKE) clean
 	$(MAKE) vet verify test
 	$(MAKE) $(addprefix release-,$(GO_TARGETS))
@@ -60,7 +55,7 @@ release: os := $(shell go env GOOS)
 release: arch := $(shell go env GOARCH)
 release: ext := $(if $(filter windows,$(os)),.exe,)
 
-release: checkout-master vet verify test clean
+release: vet verify test clean
 	@echo "Building binary for: $(os) $(arch)..."
 	GOOS=$(os) GOARCH=$(arch) $(GOBUILD) -trimpath -ldflags="-s -w -X $(RELEASE_VERSION)" -o $(RELEASE_DIR)/$(os)/$(arch)/$(BINARY_NAME)$(ext) .
 	@echo "Done!"
