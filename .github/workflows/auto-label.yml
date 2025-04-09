@@ -1,21 +1,12 @@
-name: Apply and Require a Label
-
-permissions:
-  contents: write
-  issues: write
-  pull-requests: write
-  actions: read
-
-on:
-  pull_request:
-    types: [opened, synchronize, reopened]
-
 jobs:
   auto-label:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+
+      - name: Debug - Print environment variables
+        run: env
 
       - name: Set up GitHub Script
         uses: actions/github-script@v7
