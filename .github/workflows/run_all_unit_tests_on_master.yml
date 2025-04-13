@@ -15,7 +15,7 @@ jobs:
       - name: Set Up Go
         uses: actions/setup-go@v5.4.0
         with:
-          go-version: '1.24'
+          go-version: 'go.mod'
 
       - name: Go Version
         run: go version
