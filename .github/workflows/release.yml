@@ -8,8 +8,8 @@ on:
     branches:
       - master
   push:
-    tags:
-      - 'v*'
+    branches:
+      - master
 
 jobs:
   release:
