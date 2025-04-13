@@ -35,6 +35,27 @@ jobs:
           go install golang.org/x/mobile/cmd/gomobile@latest
           export PATH=$PATH:~/go/bin
 
+      - name: Setup JDK
+        uses: actions/setup-java@v4.7.1
+        with:
+          java-version: 21
+          distribution: 'temurin'
+
+      - name: Setup Android SDK Tools
+        uses: android-actions/setup-android@v3.2.2
+        with:
+          log-accepted-android-sdk-licenses: false
+          cmdline-tools-version: '12266719'
+          packages: 'platforms;android-35 build-tools;35.0.0 platform-tools'
+
+      - name: Install NDK
+        run: |
+          echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager \
+            --channel=3 \
+            --install "ndk;29.0.13113456"
+          echo "NDK_HOME=$ANDROID_HOME/ndk/29.0.13113456" >> $GITHUB_ENV
+    
+
       - name: Build Release Artifacts
         run: make -j$(nproc) release-all
 
