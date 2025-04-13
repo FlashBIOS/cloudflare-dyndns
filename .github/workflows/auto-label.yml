@@ -3,7 +3,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4.2.2
 
       - name: Debug - Print environment variables
         run: env
@@ -52,7 +52,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
 
       - name: Required Labels - Do Not Merge
-        uses: mheap/github-action-required-labels@v5
+        uses: mheap/github-action-required-labels@v5.5.0
         with:
           mode: exactly
           count: 0
